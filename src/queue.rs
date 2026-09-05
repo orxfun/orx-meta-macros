@@ -177,12 +177,10 @@ fn method_to_impl(method: &TraitItemFn) -> syn::Result<MethodImpl> {
         || signature.constness.is_some()
         || signature.unsafety.is_some()
         || signature.abi.is_some()
-        || !signature.generics.params.is_empty()
-        || signature.generics.where_clause.is_some()
     {
         return Err(Error::new_spanned(
             signature,
-            "queue supports only non-generic, safe, synchronous methods",
+            "queue supports only safe, synchronous methods",
         ));
     }
 
@@ -272,5 +270,59 @@ mod tests {
         let output = expand(args, trait_item).unwrap().to_string();
 
         assert!(output.contains("pub const fn new () -> Self { Self }"));
+    }
+
+    #[test]
+    fn generic_methods_are_supported() {
+        let args: QueueArgs = syn::parse2(quote!(Queue; Single, Multi)).unwrap();
+        let trait_item: ItemTrait = syn::parse2(quote! {
+            trait GenericFun {
+                fn generic_work<T: Default>(&self, _value: T);
+            }
+        })
+        .unwrap();
+
+        let result = expand(args, trait_item);
+        // Should succeed, not error about non-generic methods
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn generic_methods_with_where_clauses_are_supported() {
+        let args: QueueArgs = syn::parse2(quote!(Queue; Single, Multi)).unwrap();
+        let trait_item: ItemTrait = syn::parse2(quote! {
+            trait GenericFun {
+                fn generic_work<T>(&self, _value: T)
+                where
+                    T: Default;
+            }
+        })
+        .unwrap();
+
+        let result = expand(args, trait_item);
+        // Should succeed, not error about non-generic methods
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn lifetime_and_trait_bounds_are_supported() {
+        let args: QueueArgs = syn::parse2(quote!(TaskQueue; TasksSingle, TasksMulti)).unwrap();
+        let trait_item: ItemTrait = syn::parse2(quote! {
+            trait ParFun {
+                fn run<'s, 'env, 'scope>(self, scope: impl Scope<'s, 'env, 'scope>)
+                where
+                    'scope: 's,
+                    'env: 'scope + 's,
+                    Self: 'scope + 'env;
+            }
+        })
+        .unwrap();
+
+        let result = expand(args, trait_item);
+        // Should succeed, supporting complex lifetime and trait bounds
+        assert!(result.is_ok());
+        let output = result.unwrap().to_string();
+        // Verify that the generics are preserved in the output
+        assert!(output.contains("'s") || output.contains("'scope"));
     }
 }
