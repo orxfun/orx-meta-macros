@@ -1,12 +1,11 @@
+use alloc::vec::Vec;
 use proc_macro::TokenStream;
 use proc_macro_crate::{FoundCrate, crate_name};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{
-    Error, FnArg, Ident, ItemTrait, Pat, ReturnType, Token, TraitItem, TraitItemFn,
-    parse::{Parse, ParseStream},
-    parse_macro_input,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::parse_macro_input;
+use syn::{Error, FnArg, Ident, ItemTrait, Pat, ReturnType, Token, TraitItem, TraitItemFn};
 
 struct QueueArgs {
     queue: Ident,
