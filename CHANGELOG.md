@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0](https://github.com/orxfun/orx-meta-macros/compare/v1.0.0...v1.1.0) - 2026-09-05
+
+### Added
+
+- *(queue)* add new methods for empty ([#4](https://github.com/orxfun/orx-meta-macros/pull/4))
+
+### Other
+
+- release v1.0.0 ([#3](https://github.com/orxfun/orx-meta-macros/pull/3))
+
 ## [1.0.0](https://github.com/orxfun/orx-meta-macros/releases/tag/v1.0.0) - 2026-09-05
 
 ### Added
