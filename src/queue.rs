@@ -91,6 +91,13 @@ fn expand(args: QueueArgs, trait_item: ItemTrait) -> syn::Result<TokenStream2> {
             #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
             pub struct #empty;
 
+            impl #empty {
+                /// Creates an empty queue.
+                pub const fn new() -> Self {
+                    Self
+                }
+            }
+
             impl #trait_name for #empty {
                 #(#empty_methods)*
             }
@@ -244,5 +251,26 @@ fn returns_unit(output: ReturnType) -> bool {
             syn::Type::Tuple(tuple) => tuple.elems.is_empty(),
             _ => false,
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use quote::quote;
+
+    #[test]
+    fn empty_queue_has_new_constructor() {
+        let args: QueueArgs = syn::parse2(quote!(Queue; Empty, Single, Multi)).unwrap();
+        let trait_item: ItemTrait = syn::parse2(quote! {
+            trait Fun {
+                fn work(&self);
+            }
+        })
+        .unwrap();
+
+        let output = expand(args, trait_item).unwrap().to_string();
+
+        assert!(output.contains("pub const fn new () -> Self { Self }"));
     }
 }
