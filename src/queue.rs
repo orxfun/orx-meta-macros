@@ -130,7 +130,7 @@ fn expand(args: QueueArgs, trait_item: ItemTrait) -> syn::Result<TokenStream2> {
     Ok(quote! {
         #trait_item
 
-        #orx_meta::define_queue_macro!(
+        #orx_meta::define_queue!(
             elements => [#trait_name];
             queue => [#queue; #single, #multi];
         );
